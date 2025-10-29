@@ -44,4 +44,7 @@ urlpatterns = [
     path("api/room/<str:room_code>/scenes/<int:scene_id>/", views.update_scene_api, name="update_scene"),
     path("api/room/<str:room_code>/scenes/<int:scene_id>/delete/", views.delete_scene_api, name="delete_scene"),
     path("api/room/<str:room_code>/scenes/<int:scene_id>/switch/", views.switch_scene_api, name="switch_scene"),
+    
+    # API de Upload
+    path("api/upload/image/", views.upload_image_api, name="upload_image"),
 ]

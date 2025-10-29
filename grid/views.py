@@ -8,6 +8,9 @@ from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+import cloudinary.uploader
+import base64
+from io import BytesIO
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -246,3 +249,41 @@ def switch_scene_api(request, room_code, scene_id):
         'scene_data': scene.scene_data,
         'is_active': scene.is_active
     })
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def upload_image_api(request):
+    """Faz upload de imagem para o Cloudinary"""
+    try:
+        # Pode ser um arquivo direto ou base64
+        if request.FILES.get('image'):
+            # Upload de arquivo direto
+            image_file = request.FILES['image']
+            result = cloudinary.uploader.upload(
+                image_file,
+                folder="rpg_grid",
+                resource_type="auto"
+            )
+        elif request.POST.get('image_data'):
+            # Upload de base64
+            image_data = request.POST.get('image_data')
+            
+            # Remove o prefixo data:image/...;base64, se existir
+            if ',' in image_data:
+                image_data = image_data.split(',')[1]
+            
+            result = cloudinary.uploader.upload(
+                f"data:image/png;base64,{image_data}",
+                folder="rpg_grid",
+                resource_type="auto"
+            )
+        else:
+            return JsonResponse({'error': 'Nenhuma imagem fornecida'}, status=400)
+        
+        return JsonResponse({
+            'success': True,
+            'url': result['secure_url'],
+            'public_id': result['public_id']
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

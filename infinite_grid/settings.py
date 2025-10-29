@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "channels",
+    "cloudinary",
     "grid",
 ]
 
@@ -88,6 +89,17 @@ LOGOUT_REDIRECT_URL = '/login/'
 # Upload limits - Aumentado para suportar imagens base64 nas cenas
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
+
+# Cloudinary configuration
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+cloudinary.config(
+    cloud_name = "di0zoi7ru",
+    api_key = "126586338643965",
+    api_secret = "14ILPQN14MciqjmImF79910dV_I"
+)
 
 
 # Database
