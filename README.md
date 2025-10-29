@@ -8,13 +8,15 @@ Um projeto Django com uma grid infinita interativa e otimizada.
 - **Zoom**: Use a roda do mouse para dar zoom in/out (10% até 1000%)
 - **Pan**: Clique e arraste para navegar pela grid
 - **Imagem de Fundo**: Carregue mapas de RPG ou qualquer imagem como fundo
-- **Sistema de Cenas**: 
-  - Crie múltiplas cenas/encontros
+- **Sistema de Cenas por Sala**: 
+  - **Cenas salvas no banco de dados** (não mais LocalStorage!)
+  - Cada sala tem suas próprias cenas independentes
   - Auto-save automático a cada alteração
   - Troque entre cenas instantaneamente
   - Cada cena salva: tokens, mapa, posições, zoom, configurações
-  - Persistência em LocalStorage (tudo salvo no navegador)
-  - Imagens salvas em base64 (sem necessidade de servidor)
+  - Persistência permanente no servidor
+  - Imagens salvas em base64 dentro do JSON
+  - Sincronização automática via WebSocket (mestre ↔ jogadores)
 - **Sistema de Tokens**: 
   - Crie tokens circulares com imagem e nome
   - Arraste e solte tokens pelo mapa
@@ -43,19 +45,31 @@ Um projeto Django com uma grid infinita interativa e otimizada.
 pip install -r requirements.txt
 ```
 
-2. Execute as migrações (opcional, não há models neste projeto):
+2. Execute as migrações:
 ```bash
 python manage.py migrate
 ```
 
-3. Inicie o servidor:
+3. Crie um superusuário (opcional, para acessar o admin):
+```bash
+python manage.py createsuperuser
+```
+
+4. Inicie o servidor:
 ```bash
 python manage.py runserver
 ```
 
-4. Acesse no navegador:
+5. Acesse no navegador:
+
+**Login de Mestre:**
 ```
-http://localhost:8000
+http://127.0.0.1:8000/login/
+```
+
+**Admin Django (gerenciar salas e cenas):**
+```
+http://127.0.0.1:8000/admin/
 ```
 
 ## 🎮 Controles
@@ -172,11 +186,14 @@ O sistema é altamente otimizado para garantir performance fluida mesmo com muit
 - Sombras e bordas renderizadas com hardware acceleration
 
 **Sistema de Persistência:**
-- LocalStorage do navegador para armazenamento
+- **Banco de dados PostgreSQL/SQLite** para armazenamento permanente
+- **Cenas por sala** - cada sala tem suas próprias cenas isoladas
 - Auto-save com debounce (500ms) para evitar saves excessivos
-- Imagens convertidas para base64 (sem servidor necessário)
+- Imagens convertidas para base64 (armazenadas no JSON do banco)
 - Serialização/deserialização eficiente de estado
 - Cada cena é completamente independente
+- **API REST** para criar/editar/deletar/trocar cenas
+- **WebSocket** para sincronização em tempo real
 
 **Performance Geral:**
 - Canvas HTML5 com aceleração por hardware
@@ -186,4 +203,25 @@ O sistema é altamente otimizado para garantir performance fluida mesmo com muit
 - Troca instantânea entre cenas
 
 Isso garante performance constante independente do nível de zoom, posição, quantidade de tokens ou número de cenas.
+
+## 📖 Documentação Adicional
+
+- `MULTIPLAYER_SETUP.md` - Como configurar o sistema multiplayer
+- `IMPLEMENTACAO_MULTIPLAYER.md` - Guia de implementação dos templates
+- **`CENAS_POR_SALA.md`** - Sistema de cenas por sala **(NOVO!)**
+- `COMO_USAR.md` - Como usar o sistema completo
+- `STATUS_FINAL.md` - Status final do projeto
+
+## 🎯 Novidades
+
+### ✨ Sistema de Cenas por Sala
+Agora cada sala tem suas próprias cenas salvas no banco de dados:
+- ✅ Persistência permanente (não depende do navegador)
+- ✅ Compartilhamento automático entre mestre e jogadores
+- ✅ API REST para gerenciamento de cenas
+- ✅ Sincronização em tempo real via WebSocket
+- ✅ Isolamento total entre salas
+- ✅ Gerenciamento pelo Django Admin
+
+📚 Veja `CENAS_POR_SALA.md` para mais detalhes!
 

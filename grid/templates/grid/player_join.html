@@ -1,0 +1,39 @@
+{% extends 'grid/base.html' %}
+
+{% block title %}Entrar como Jogador - RPG Grid{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>🎮 Entrar como Jogador</h1>
+    <p style="text-align: center; color: #666; margin-bottom: 30px;">
+        Digite seu nome e o código da sala fornecido pelo mestre
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="player_name">Seu Nome</label>
+            <input type="text" id="player_name" name="player_name" placeholder="Ex: João Aventureiro" required>
+        </div>
+
+        <div class="form-group">
+            <label for="room_code">Código da Sala</label>
+            <input type="text" id="room_code" name="room_code" placeholder="Ex: ABC123" required style="text-transform: uppercase;">
+        </div>
+
+        <button type="submit">🚪 Entrar na Sala</button>
+    </form>
+
+    <div class="link">
+        <p>É um mestre? <a href="{% url 'login' %}">Fazer login</a></p>
+    </div>
+</div>
+
+<script>
+    // Força uppercase no código
+    document.getElementById('room_code').addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+    });
+</script>
+{% endblock %}
+

@@ -1,0 +1,37 @@
+{% extends 'grid/base.html' %}
+
+{% block title %}Login - RPG Grid{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>🎭 RPG Grid Multiplayer</h1>
+    <h2>Login do Mestre</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">Usuário</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Senha</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+
+        <button type="submit">🔓 Entrar como Mestre</button>
+    </form>
+
+    <div class="link">
+        <p>Não tem conta? <a href="{% url 'register' %}">Registre-se</a></p>
+    </div>
+
+    <div class="link" style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee;">
+        <p>Ou</p>
+        <a href="{% url 'player_join' %}" class="btn" style="margin-top: 10px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+            🎮 Entrar como Jogador
+        </a>
+    </div>
+</div>
+{% endblock %}
+
