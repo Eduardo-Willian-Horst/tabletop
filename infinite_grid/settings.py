@@ -85,6 +85,10 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/login/'
 
+# Upload limits - Aumentado para suportar imagens base64 nas cenas
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
+
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases

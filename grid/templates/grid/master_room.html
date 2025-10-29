@@ -30,16 +30,72 @@
             cursor: grabbing;
         }
 
-        .controls {
+        /* Menu Lateral */
+        .sidebar {
             position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(30, 30, 30, 0.95);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            top: 0;
+            left: 0;
+            width: 380px;
+            height: 100vh;
+            background: rgba(20, 20, 20, 0.98);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
             z-index: 1000;
-            min-width: 280px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-340px);
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            top: 20px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: #4CAF50;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 1001;
+        }
+
+        .sidebar-toggle:hover {
+            background: #45a049;
+            transform: scale(1.1);
+        }
+
+        .sidebar-content {
+            padding: 20px;
+            padding-top: 60px;
+        }
+
+        .sidebar-section {
+            background: rgba(40, 40, 40, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-section h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4CAF50;
         }
 
         .controls h3 {
@@ -109,10 +165,13 @@
             background: #2a2a2a;
             outline: none;
             -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
 
         .control-group input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
+            -moz-appearance: none;
             appearance: none;
             width: 18px;
             height: 18px;
@@ -190,26 +249,6 @@
             font-weight: 600;
         }
 
-        .token-panel {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(30, 30, 30, 0.95);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            min-width: 280px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .token-panel h3 {
-            color: #fff;
-            margin-bottom: 15px;
-            font-size: 18px;
-            font-weight: 600;
-        }
 
         .token-form {
             border: 2px dashed #4CAF50;
@@ -249,7 +288,7 @@
         }
 
         .token-list {
-            max-height: 300px;
+            max-height: 250px;
             overflow-y: auto;
         }
 
@@ -263,16 +302,17 @@
             margin-bottom: 8px;
             cursor: pointer;
             transition: all 0.2s;
+            border: 2px solid transparent;
         }
 
         .token-item:hover {
             background: #333;
-            transform: translateX(5px);
         }
 
         .token-item.selected {
             border: 2px solid #4CAF50;
-            background: rgba(76, 175, 80, 0.1);
+            background: rgba(76, 175, 80, 0.15);
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
         }
 
         .token-preview {
@@ -368,39 +408,21 @@
             font-size: 13px;
         }
 
-        .scene-panel {
-            position: fixed;
-            bottom: 20px;
-            left: 420px;
-            background: rgba(30, 30, 30, 0.95);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            min-width: 320px;
-            max-width: 400px;
-        }
-
-        .scene-panel h3 {
-            color: #fff;
-            margin-bottom: 15px;
-            font-size: 18px;
-            font-weight: 600;
-        }
 
         .scene-form {
             margin-bottom: 15px;
+            display: flex;
+            gap: 0;
         }
 
         .scene-form input[type="text"] {
-            width: calc(100% - 60px);
+            flex: 1;
             padding: 10px;
             border: 1px solid #4CAF50;
             border-radius: 6px 0 0 6px;
             background: #2a2a2a;
             color: #fff;
             font-size: 14px;
-            float: left;
         }
 
         .scene-form button {
@@ -413,19 +435,7 @@
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
-            float: left;
-        }
-
-        .scene-form::after {
-            content: "";
-            display: table;
-            clear: both;
-        }
-
-        .scene-list {
-            max-height: 250px;
-            overflow-y: auto;
-            margin-bottom: 10px;
+            margin: 0;
         }
 
         .scene-item {
@@ -433,21 +443,40 @@
             align-items: center;
             gap: 10px;
             padding: 12px;
+            padding-right: 40px;
             background: #2a2a2a;
             border-radius: 8px;
             margin-bottom: 8px;
             cursor: pointer;
             transition: all 0.2s;
+            border: 2px solid transparent;
+            position: relative;
         }
 
         .scene-item:hover {
             background: #333;
-            transform: translateX(5px);
         }
 
         .scene-item.active {
             border: 2px solid #4CAF50;
-            background: rgba(76, 175, 80, 0.1);
+            background: rgba(76, 175, 80, 0.15);
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .scene-item.active::before {
+            content: '▶';
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #4CAF50;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .scene-item.active .scene-icon {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4CAF50;
         }
 
         .scene-icon {
@@ -477,23 +506,39 @@
         }
 
         .scene-delete {
-            padding: 8px 12px;
-            background: #f44336;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            background: rgba(244, 67, 54, 0.8);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            opacity: 0;
+            z-index: 10;
+        }
+        
+        .scene-item:hover .scene-delete {
+            opacity: 1;
         }
 
         .scene-delete:hover {
             background: #da190b;
+            transform: scale(1.1);
         }
 
         .autosave-indicator {
             position: fixed;
-            bottom: 80px;
-            left: 20px;
+            bottom: 20px;
+            right: 20px;
             background: rgba(76, 175, 80, 0.9);
             color: white;
             padding: 8px 16px;
@@ -510,24 +555,11 @@
             opacity: 1;
         }
 
-        .room-indicator {
-            position: fixed;
-            top: 20px;
-            right: 340px;
-            background: rgba(76, 175, 80, 0.9);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 20px;
-            z-index: 1001;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            font-size: 14px;
-            font-weight: 600;
-        }
 
         .player-notification {
             position: fixed;
             top: 80px;
-            right: 340px;
+            right: 20px;
             background: rgba(33, 150, 243, 0.9);
             color: white;
             padding: 12px 20px;
@@ -549,28 +581,9 @@
         }
 
         /* Painel de Jogadores */
-        .players-panel {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(30, 30, 30, 0.95);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            min-width: 280px;
-            max-height: 80vh;
+        .players-list-container {
+            max-height: 250px;
             overflow-y: auto;
-        }
-
-        .players-panel h3 {
-            color: #fff;
-            margin-bottom: 15px;
-            font-size: 18px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
         .player-item {
@@ -679,8 +692,8 @@
 
         .back-button {
             position: fixed;
-            top: 80px;
-            left: 20px;
+            top: 20px;
+            right: 20px;
             padding: 10px 20px;
             background: rgba(244, 67, 54, 0.9);
             color: white;
@@ -696,127 +709,174 @@
         .back-button:hover {
             background: rgba(244, 67, 54, 1);
         }
+        
+        .scene-list {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        
+        /* Scrollbar customizado */
+        .sidebar::-webkit-scrollbar,
+        .token-list::-webkit-scrollbar,
+        .scene-list::-webkit-scrollbar,
+        .players-list-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track,
+        .token-list::-webkit-scrollbar-track,
+        .scene-list::-webkit-scrollbar-track,
+        .players-list-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb,
+        .token-list::-webkit-scrollbar-thumb,
+        .scene-list::-webkit-scrollbar-thumb,
+        .players-list-container::-webkit-scrollbar-thumb {
+            background: rgba(76, 175, 80, 0.5);
+            border-radius: 4px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb:hover,
+        .token-list::-webkit-scrollbar-thumb:hover,
+        .scene-list::-webkit-scrollbar-thumb:hover,
+        .players-list-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(76, 175, 80, 0.8);
+        }
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
     
-    <div class="room-indicator">
-        🎭 <strong>Sala:</strong> {{ room.name }} | <strong>Código:</strong> {{ room.code }}
+    <!-- Menu Lateral -->
+    <div class="sidebar" id="sidebar">
+        <button class="sidebar-toggle" id="sidebarToggle">◀</button>
+        
+        <div class="sidebar-content">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: #4CAF50; margin: 0; font-size: 20px;">🎭 {{ room.name }}</h2>
+                <p style="color: #888; font-size: 12px; margin: 5px 0;">Código: {{ room.code }}</p>
+            </div>
+            
+            <!-- Seção: Controles da Grid -->
+            <div class="sidebar-section">
+                <h3>⚙️ Controles da Grid</h3>
+                
+                <div class="control-group">
+                    <label>Imagem de Fundo (Mapa)</label>
+                    <input type="file" id="bgImage" accept="image/*">
+                </div>
+                
+                <div class="control-group">
+                    <label>
+                        Opacidade da Imagem
+                        <span class="value-display" id="imageOpacityValue">100%</span>
+                    </label>
+                    <input type="range" id="imageOpacity" min="0" max="100" value="100">
+                </div>
+                
+                <div class="control-group">
+                    <label>
+                        Escala da Imagem
+                        <span class="value-display" id="imageScaleValue">1.0x</span>
+                    </label>
+                    <input type="range" id="imageScale" min="10" max="300" value="100">
+                </div>
+                
+                <div class="control-group">
+                    <label>Cor do Background</label>
+                    <input type="color" id="bgColor" value="#1a1a1a">
+                </div>
+                
+                <div class="control-group">
+                    <label>Cor da Grid</label>
+                    <input type="color" id="gridColor" value="#333333">
+                </div>
+                
+                <div class="control-group">
+                    <label>
+                        Opacidade da Grid
+                        <span class="value-display" id="gridOpacityValue">100%</span>
+                    </label>
+                    <input type="range" id="gridOpacity" min="0" max="100" value="100">
+                </div>
+                
+                <div class="control-group">
+                    <label>
+                        Tamanho da Grid
+                        <span class="value-display" id="gridSizeValue">50px</span>
+                    </label>
+                    <input type="range" id="gridSize" min="10" max="200" value="50">
+                </div>
+                
+                <div class="control-group">
+                    <label>
+                        Espessura da Linha
+                        <span class="value-display" id="lineWidthValue">1px</span>
+                    </label>
+                    <input type="range" id="lineWidth" min="0.5" max="5" step="0.5" value="1">
+                </div>
+                
+                <button id="removeImage">🗑️ Remover Imagem</button>
+                <button id="resetView">🔄 Resetar Visualização</button>
+            </div>
+            
+            <!-- Seção: Tokens -->
+            <div class="sidebar-section">
+                <h3>🎭 Tokens</h3>
+                
+                <div class="token-form">
+                    <input type="text" id="tokenName" placeholder="Nome do Token" />
+                    <input type="file" id="tokenImage" accept="image/*" />
+                    <div class="token-size-control">
+                        <label>Tamanho (células da grid)</label>
+                        <input type="number" id="tokenSize" min="1" max="10" value="1" />
+                    </div>
+                    <button id="createToken">➕ Criar Token</button>
+                </div>
+                
+                <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                    <button id="showAllTokens" style="flex: 1; padding: 8px; font-size: 12px;">👁️ Todos</button>
+                    <button id="hideAllTokens" style="flex: 1; padding: 8px; font-size: 12px;">👁️‍🗨️ Ocultar</button>
+                </div>
+                
+                <div class="token-list" id="tokenList">
+                    <!-- Tokens serão adicionados aqui -->
+                </div>
+            </div>
+            
+            <!-- Seção: Cenas -->
+            <div class="sidebar-section">
+                <h3>🎬 Cenas</h3>
+                
+                <div class="scene-form">
+                    <input type="text" id="sceneName" placeholder="Nome da cena" />
+                    <button id="createScene">➕</button>
+                </div>
+                
+                <div class="scene-list" id="sceneList">
+                    <!-- Cenas serão adicionadas aqui -->
+                </div>
+            </div>
+            
+            <!-- Seção: Jogadores -->
+            <div class="sidebar-section">
+                <h3>
+                    👥 Jogadores
+                    <span id="playerCount" style="font-size: 14px; color: #4CAF50;">(0)</span>
+                </h3>
+                <div class="players-list-container" id="playersList">
+                    <div class="no-players">Aguardando jogadores...</div>
+                </div>
+            </div>
+        </div>
     </div>
     
     <a href="{% url 'dashboard' %}" class="back-button">◀ Voltar</a>
     
     <div class="autosave-indicator" id="autosaveIndicator">💾 Cena salva!</div>
-    
-    <div class="controls">
-        <h3>⚙️ Controles</h3>
-        
-        <div class="control-group">
-            <label>Imagem de Fundo (Mapa)</label>
-            <input type="file" id="bgImage" accept="image/*">
-        </div>
-        
-        <div class="control-group">
-            <label>
-                Opacidade da Imagem
-                <span class="value-display" id="imageOpacityValue">100%</span>
-            </label>
-            <input type="range" id="imageOpacity" min="0" max="100" value="100">
-        </div>
-        
-        <div class="control-group">
-            <label>
-                Escala da Imagem
-                <span class="value-display" id="imageScaleValue">1.0x</span>
-            </label>
-            <input type="range" id="imageScale" min="10" max="300" value="100">
-        </div>
-        
-        <div class="control-group">
-            <label>Cor do Background</label>
-            <input type="color" id="bgColor" value="#1a1a1a">
-        </div>
-        
-        <div class="control-group">
-            <label>Cor da Grid</label>
-            <input type="color" id="gridColor" value="#333333">
-        </div>
-        
-        <div class="control-group">
-            <label>
-                Opacidade da Grid
-                <span class="value-display" id="gridOpacityValue">100%</span>
-            </label>
-            <input type="range" id="gridOpacity" min="0" max="100" value="100">
-        </div>
-        
-        <div class="control-group">
-            <label>
-                Tamanho da Grid
-                <span class="value-display" id="gridSizeValue">50px</span>
-            </label>
-            <input type="range" id="gridSize" min="10" max="200" value="50">
-        </div>
-        
-        <div class="control-group">
-            <label>
-                Espessura da Linha
-                <span class="value-display" id="lineWidthValue">1px</span>
-            </label>
-            <input type="range" id="lineWidth" min="0.5" max="5" step="0.5" value="1">
-        </div>
-        
-        <button id="removeImage">🗑️ Remover Imagem</button>
-        <button id="resetView">🔄 Resetar Visualização</button>
-    </div>
-    
-    <div class="token-panel">
-        <h3>🎭 Tokens</h3>
-        
-        <div class="token-form">
-            <input type="text" id="tokenName" placeholder="Nome do Token" />
-            <input type="file" id="tokenImage" accept="image/*" />
-            <div class="token-size-control">
-                <label>Tamanho (células da grid)</label>
-                <input type="number" id="tokenSize" min="1" max="10" value="1" />
-            </div>
-            <button id="createToken">➕ Criar Token</button>
-        </div>
-        
-        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-            <button id="showAllTokens" style="flex: 1; padding: 8px; font-size: 12px;">👁️ Mostrar Todos</button>
-            <button id="hideAllTokens" style="flex: 1; padding: 8px; font-size: 12px;">👁️‍🗨️ Ocultar Todos</button>
-        </div>
-        
-        <div class="token-list" id="tokenList">
-            <!-- Tokens serão adicionados aqui -->
-        </div>
-    </div>
-    
-    <div class="scene-panel">
-        <h3>🎬 Cenas</h3>
-        
-        <div class="scene-form">
-            <input type="text" id="sceneName" placeholder="Nome da cena" />
-            <button id="createScene">➕</button>
-        </div>
-        
-        <div class="scene-list" id="sceneList">
-            <!-- Cenas serão adicionadas aqui -->
-        </div>
-    </div>
-    
-    <!-- Painel de Jogadores -->
-    <div class="players-panel">
-        <h3>
-            👥 Jogadores
-            <span id="playerCount" style="font-size: 14px; color: #4CAF50;">(0)</span>
-        </h3>
-        <div id="playersList">
-            <div class="no-players">Aguardando jogadores...</div>
-        </div>
-    </div>
     
     <div class="info">
         <div style="margin-top: 5px;">Zoom: <span id="zoomLevel">100%</span></div>
@@ -1204,6 +1264,8 @@
         
         // Carrega um estado na cena atual
         function loadState(state) {
+            console.log('loadState chamada com:', state);
+            
             // Limpa tokens atuais
             tokens = [];
             selectedToken = null;
@@ -1222,6 +1284,8 @@
             scale = state.scale || 1;
             nextTokenId = state.nextTokenId || 1;
             
+            console.log('Configurações restauradas:', {bgColor, gridColor, gridSize, offsetX, offsetY, scale});
+            
             // Atualiza controles da interface
             document.getElementById('bgColor').value = bgColor;
             document.getElementById('gridColor').value = gridColor;
@@ -1239,18 +1303,25 @@
             
             // Carrega imagem de fundo
             if (state.backgroundImage) {
+                console.log('Carregando imagem de fundo...');
                 const img = new Image();
                 img.onload = () => {
                     backgroundImage = img;
+                    console.log('Imagem de fundo carregada');
                     draw();
+                };
+                img.onerror = () => {
+                    console.error('Erro ao carregar imagem de fundo');
                 };
                 img.src = state.backgroundImage;
             } else {
+                console.log('Nenhuma imagem de fundo nesta cena');
                 backgroundImage = null;
             }
             
             // Carrega tokens
             if (state.tokens && state.tokens.length > 0) {
+                console.log(`Carregando ${state.tokens.length} tokens...`);
                 let loadedTokens = 0;
                 state.tokens.forEach(tokenData => {
                     const img = new Image();
@@ -1268,16 +1339,22 @@
                         };
                         tokens.push(token);
                         loadedTokens++;
+                        console.log(`Token ${loadedTokens}/${state.tokens.length} carregado:`, token.name);
                         
                         if (loadedTokens === state.tokens.length) {
+                            console.log('Todos os tokens carregados!');
                             updateTokenList();
                             updatePlayerTokenSelects();
                             draw();
                         }
                     };
+                    img.onerror = () => {
+                        console.error('Erro ao carregar imagem do token:', tokenData.name);
+                    };
                     img.src = tokenData.imageSrc;
                 });
             } else {
+                console.log('Nenhum token nesta cena');
                 updateTokenList();
                 updatePlayerTokenSelects();
                 draw();
@@ -1405,11 +1482,15 @@
         
         // Troca para uma cena
         async function switchToScene(scene, saveCurrentFirst = true) {
+            console.log('switchToScene chamada:', scene.name, 'saveCurrentFirst:', saveCurrentFirst);
+            
             if (saveCurrentFirst && currentScene) {
+                console.log('Salvando cena atual antes de trocar...');
                 await saveCurrentScene();
             }
             
             try {
+                console.log('Fazendo requisição para trocar cena...');
                 // Marcar como ativa no banco
                 const response = await fetch(`${API_BASE}/scenes/${scene.id}/switch/`, {
                     method: 'POST',
@@ -1419,15 +1500,24 @@
                     }
                 });
                 
+                console.log('Response status:', response.status);
+                
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('Dados da cena recebidos:', data);
                     currentScene = data;
                     
                     // Atualizar is_active localmente
                     scenes.forEach(s => s.is_active = (s.id === currentScene.id));
                     
+                    console.log('Carregando estado da cena...');
                     loadState(currentScene.scene_data);
                     updateSceneList();
+                    console.log('Cena trocada com sucesso!');
+                } else {
+                    console.error('Erro na resposta:', response.status, response.statusText);
+                    const errorText = await response.text();
+                    console.error('Erro detalhado:', errorText);
                 }
             } catch (error) {
                 console.error('Erro ao trocar cena:', error);
@@ -1489,7 +1579,7 @@
             
             scenes.forEach(scene => {
                 const item = document.createElement('div');
-                item.className = 'scene-item' + (scene === currentScene ? ' active' : '');
+                item.className = 'scene-item' + (scene.id === currentScene?.id ? ' active' : '');
                 
                 const icon = document.createElement('div');
                 icon.className = 'scene-icon';
@@ -1501,6 +1591,20 @@
                 const name = document.createElement('div');
                 name.className = 'name';
                 name.textContent = scene.name;
+                
+                // Adiciona badge de cena ativa
+                if (scene.id === currentScene?.id) {
+                    const activeBadge = document.createElement('span');
+                    activeBadge.style.marginLeft = '8px';
+                    activeBadge.style.fontSize = '10px';
+                    activeBadge.style.color = '#4CAF50';
+                    activeBadge.style.fontWeight = 'bold';
+                    activeBadge.style.background = 'rgba(76, 175, 80, 0.2)';
+                    activeBadge.style.padding = '2px 6px';
+                    activeBadge.style.borderRadius = '4px';
+                    activeBadge.textContent = 'ATIVA';
+                    name.appendChild(activeBadge);
+                }
                 
                 const meta = document.createElement('div');
                 meta.className = 'meta';
@@ -1525,9 +1629,19 @@
                 item.appendChild(info);
                 item.appendChild(deleteBtn);
                 
-                item.onclick = async () => {
-                    if (scene !== currentScene) {
+                item.onclick = async (e) => {
+                    // Ignora se clicou no botão de deletar
+                    if (e.target.closest('.scene-delete')) {
+                        return;
+                    }
+                    
+                    console.log('Clicou na cena:', scene.name, 'Atual:', currentScene?.name);
+                    
+                    if (scene.id !== currentScene?.id) {
+                        console.log('Trocando para cena:', scene.name);
                         await switchToScene(scene);
+                    } else {
+                        console.log('Já está nesta cena');
                     }
                 };
                 
@@ -2098,6 +2212,15 @@
 
         // Conectar WebSocket ao carregar
         connectWebSocket();
+        
+        // ==================== TOGGLE SIDEBAR ====================
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            sidebarToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
+        });
     </script>
 </body>
 </html>
