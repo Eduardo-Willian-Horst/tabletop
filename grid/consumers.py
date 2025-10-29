@@ -84,6 +84,32 @@ class GameRoomConsumer(AsyncWebsocketConsumer):
                 }
             )
         
+        elif action == 'move_token':
+            # Jogador move seu token
+            token_id = data.get('token_id')
+            grid_x = data.get('gridX')
+            grid_y = data.get('gridY')
+            player_name = self.scope['session'].get('player_name') if not self.user.is_authenticated else self.user.username
+            
+            # Buscar cena ativa e verificar permissão
+            can_move = await self.can_player_move_token(token_id, player_name)
+            
+            if can_move:
+                # Atualizar posição do token na cena
+                await self.update_token_position(token_id, grid_x, grid_y)
+                
+                # Broadcast para todos
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'token_moved',
+                        'token_id': token_id,
+                        'gridX': grid_x,
+                        'gridY': grid_y,
+                        'moved_by': player_name
+                    }
+                )
+        
         elif action == 'get_state':
             # Jogador pede estado atual
             room_data = await self.get_room_data()
@@ -109,6 +135,15 @@ class GameRoomConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'type': 'member_left',
             'member': event['member']
+        }))
+    
+    async def token_moved(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'token_moved',
+            'token_id': event['token_id'],
+            'gridX': event['gridX'],
+            'gridY': event['gridY'],
+            'moved_by': event['moved_by']
         }))
     
     # Database queries
@@ -210,6 +245,49 @@ class GameRoomConsumer(AsyncWebsocketConsumer):
             else:
                 player_name = self.scope['session'].get('player_name')
                 RoomMember.objects.filter(room=room, player_name=player_name).update(is_online=is_online)
+        except Room.DoesNotExist:
+            pass
+    
+    @database_sync_to_async
+    def can_player_move_token(self, token_id, player_name):
+        try:
+            room = Room.objects.get(code=self.room_code)
+            active_scene = room.scenes.filter(is_active=True).first()
+            
+            if not active_scene or not active_scene.scene_data:
+                return False
+            
+            tokens = active_scene.scene_data.get('tokens', [])
+            token = next((t for t in tokens if t['id'] == token_id), None)
+            
+            if token and token.get('controlledBy') == player_name:
+                return True
+            
+            return False
+        except Room.DoesNotExist:
+            return False
+    
+    @database_sync_to_async
+    def update_token_position(self, token_id, grid_x, grid_y):
+        try:
+            room = Room.objects.get(code=self.room_code)
+            active_scene = room.scenes.filter(is_active=True).first()
+            
+            if not active_scene:
+                return
+            
+            scene_data = active_scene.scene_data or {}
+            tokens = scene_data.get('tokens', [])
+            
+            for token in tokens:
+                if token['id'] == token_id:
+                    token['gridX'] = grid_x
+                    token['gridY'] = grid_y
+                    break
+            
+            scene_data['tokens'] = tokens
+            active_scene.scene_data = scene_data
+            active_scene.save()
         except Room.DoesNotExist:
             pass
 

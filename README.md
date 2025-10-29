@@ -208,7 +208,9 @@ Isso garante performance constante independente do nível de zoom, posição, qu
 
 - `MULTIPLAYER_SETUP.md` - Como configurar o sistema multiplayer
 - `IMPLEMENTACAO_MULTIPLAYER.md` - Guia de implementação dos templates
-- **`CENAS_POR_SALA.md`** - Sistema de cenas por sala **(NOVO!)**
+- **`CENAS_POR_SALA.md`** - Sistema de cenas por sala
+- **`SISTEMA_CONTROLE_TOKENS.md`** - Sistema de controle de tokens por jogador **(NOVO!)**
+- **`CORRECAO_WEBSOCKET.md`** - Correção de sincronização
 - `COMO_USAR.md` - Como usar o sistema completo
 - `STATUS_FINAL.md` - Status final do projeto
 
@@ -224,4 +226,15 @@ Agora cada sala tem suas próprias cenas salvas no banco de dados:
 - ✅ Gerenciamento pelo Django Admin
 
 📚 Veja `CENAS_POR_SALA.md` para mais detalhes!
+
+### 🎮 Sistema de Controle de Tokens por Jogador **(NOVO!)**
+Mestre pode atribuir tokens específicos para cada jogador:
+- ✅ Painel de jogadores online em tempo real
+- ✅ Atribuição visual de tokens por jogador
+- ✅ Jogadores movem apenas seus tokens
+- ✅ Indicador visual (badge) mostrando ownership
+- ✅ Sincronização em tempo real via WebSocket
+- ✅ Segurança no backend (verificação de permissões)
+
+📚 Veja `SISTEMA_CONTROLE_TOKENS.md` para mais detalhes!
 

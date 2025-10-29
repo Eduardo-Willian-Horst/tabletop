@@ -548,6 +548,135 @@
             }
         }
 
+        /* Painel de Jogadores */
+        .players-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(30, 30, 30, 0.95);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            min-width: 280px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .players-panel h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-item {
+            background: #2a2a2a;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .player-item.online {
+            border-color: #4CAF50;
+        }
+
+        .player-item.offline {
+            opacity: 0.5;
+        }
+
+        .player-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .player-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #888;
+        }
+
+        .player-status.online {
+            background: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .player-name {
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            flex: 1;
+        }
+
+        .player-role {
+            background: #2196F3;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .player-role.master {
+            background: #FF9800;
+        }
+
+        .player-token-control {
+            margin-top: 8px;
+        }
+
+        .player-token-control label {
+            color: #aaa;
+            font-size: 11px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .player-token-control select {
+            width: 100%;
+            padding: 6px;
+            background: #1a1a1a;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .player-token-control select:hover {
+            border-color: #4CAF50;
+        }
+
+        .no-players {
+            color: #888;
+            text-align: center;
+            padding: 20px;
+            font-size: 13px;
+        }
+
+        .controlled-token-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #2196F3;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 600;
+            pointer-events: none;
+            z-index: 10;
+        }
+
         .back-button {
             position: fixed;
             top: 80px;
@@ -678,6 +807,17 @@
         </div>
     </div>
     
+    <!-- Painel de Jogadores -->
+    <div class="players-panel">
+        <h3>
+            👥 Jogadores
+            <span id="playerCount" style="font-size: 14px; color: #4CAF50;">(0)</span>
+        </h3>
+        <div id="playersList">
+            <div class="no-players">Aguardando jogadores...</div>
+        </div>
+    </div>
+    
     <div class="info">
         <div>🖱️ <span>Arraste</span> para mover | 🔍 <span>Scroll</span> para zoom</div>
         <div style="margin-top: 5px;">Zoom: <span id="zoomLevel">100%</span></div>
@@ -724,6 +864,9 @@
         let currentScene = null;
         let autoSaveTimeout = null;
         const API_BASE = `/api/room/{{ room.code }}`;
+        
+        // Sistema de jogadores
+        let connectedPlayers = [];
         
         // Controle de arraste
         let isDragging = false;
@@ -857,6 +1000,33 @@
                 ctx.strokeText(token.name, tokenX + tokenRadius, textY);
                 ctx.fillText(token.name, tokenX + tokenRadius, textY);
                 ctx.restore();
+                
+                // Indicador de controle do jogador
+                if (token.controlledBy) {
+                    ctx.save();
+                    const badgeX = tokenX + tokenRadius * 2 - 10;
+                    const badgeY = tokenY - 5;
+                    const badgeRadius = 15;
+                    
+                    // Círculo do badge
+                    ctx.beginPath();
+                    ctx.arc(badgeX, badgeY, badgeRadius, 0, Math.PI * 2);
+                    ctx.fillStyle = '#2196F3';
+                    ctx.fill();
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
+                    // Iniciais do jogador ou ícone
+                    ctx.font = `bold ${10}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#fff';
+                    const initials = token.controlledBy.substring(0, 2).toUpperCase();
+                    ctx.fillText(initials, badgeX, badgeY);
+                    
+                    ctx.restore();
+                }
             });
         }
         
@@ -973,14 +1143,18 @@
                     id: nextTokenId++,
                     name: name,
                     image: img,
+                    imageSrc: imageSrc, // Salvar para persistência
                     size: size,
                     gridX: 0, // Começa no centro
                     gridY: 0,
-                    visible: true // Visível por padrão
+                    visible: true, // Visível por padrão
+                    controlledBy: null // null = apenas mestre pode mover
                 };
                 tokens.push(token);
                 updateTokenList();
+                updatePlayerTokenSelects();
                 draw();
+                autoSaveCurrentScene();
             };
             img.src = imageSrc;
         }
@@ -1011,7 +1185,8 @@
                     size: token.size,
                     gridX: token.gridX,
                     gridY: token.gridY,
-                    visible: token.visible
+                    visible: token.visible,
+                    controlledBy: token.controlledBy || null
                 })),
                 backgroundImage: backgroundImage ? backgroundImage.src : null,
                 imageOpacity: imageOpacity,
@@ -1085,9 +1260,11 @@
                             id: tokenData.id,
                             name: tokenData.name,
                             image: img,
+                            imageSrc: tokenData.imageSrc,
                             size: tokenData.size,
                             gridX: tokenData.gridX,
                             gridY: tokenData.gridY,
+                            controlledBy: tokenData.controlledBy || null,
                             visible: tokenData.visible !== undefined ? tokenData.visible : true
                         };
                         tokens.push(token);
@@ -1095,6 +1272,7 @@
                         
                         if (loadedTokens === state.tokens.length) {
                             updateTokenList();
+                            updatePlayerTokenSelects();
                             draw();
                         }
                     };
@@ -1102,6 +1280,7 @@
                 });
             } else {
                 updateTokenList();
+                updatePlayerTokenSelects();
                 draw();
             }
         }
@@ -1674,6 +1853,144 @@
             }
         });
 
+        // ==================== SISTEMA DE JOGADORES ====================
+        
+        // Atualiza a lista de jogadores
+        function updatePlayersList(players) {
+            connectedPlayers = players || [];
+            const playersList = document.getElementById('playersList');
+            const playerCount = document.getElementById('playerCount');
+            
+            // Filtra apenas jogadores (não o mestre)
+            const actualPlayers = connectedPlayers.filter(p => p.role === 'player');
+            playerCount.textContent = `(${actualPlayers.length})`;
+            
+            if (actualPlayers.length === 0) {
+                playersList.innerHTML = '<div class="no-players">Aguardando jogadores...</div>';
+                return;
+            }
+            
+            playersList.innerHTML = '';
+            
+            actualPlayers.forEach(player => {
+                const playerItem = document.createElement('div');
+                playerItem.className = `player-item ${player.is_online ? 'online' : 'offline'}`;
+                
+                const playerHeader = document.createElement('div');
+                playerHeader.className = 'player-header';
+                
+                const statusDot = document.createElement('div');
+                statusDot.className = `player-status ${player.is_online ? 'online' : ''}`;
+                
+                const playerName = document.createElement('div');
+                playerName.className = 'player-name';
+                playerName.textContent = player.player_name;
+                
+                const playerRole = document.createElement('div');
+                playerRole.className = 'player-role';
+                playerRole.textContent = player.role;
+                
+                playerHeader.appendChild(statusDot);
+                playerHeader.appendChild(playerName);
+                playerHeader.appendChild(playerRole);
+                
+                // Controle de token
+                const tokenControl = document.createElement('div');
+                tokenControl.className = 'player-token-control';
+                
+                const label = document.createElement('label');
+                label.textContent = 'Token controlado:';
+                
+                const select = document.createElement('select');
+                select.innerHTML = '<option value="">Nenhum</option>';
+                
+                // Adiciona tokens disponíveis
+                tokens.forEach(token => {
+                    const option = document.createElement('option');
+                    option.value = token.id;
+                    option.textContent = token.name;
+                    if (token.controlledBy === player.player_name) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+                
+                select.addEventListener('change', (e) => {
+                    const tokenId = parseInt(e.target.value);
+                    assignTokenToPlayer(tokenId, player.player_name);
+                });
+                
+                tokenControl.appendChild(label);
+                tokenControl.appendChild(select);
+                
+                playerItem.appendChild(playerHeader);
+                if (player.is_online) {
+                    playerItem.appendChild(tokenControl);
+                }
+                
+                playersList.appendChild(playerItem);
+            });
+        }
+        
+        // Atribuir token a jogador
+        function assignTokenToPlayer(tokenId, playerName) {
+            // Primeiro, remove atribuição anterior deste jogador
+            tokens.forEach(t => {
+                if (t.controlledBy === playerName) {
+                    t.controlledBy = null;
+                }
+            });
+            
+            // Atribui o novo token se tokenId for válido
+            if (tokenId) {
+                const token = tokens.find(t => t.id === tokenId);
+                if (token) {
+                    // Remove atribuição anterior deste token (se houver)
+                    token.controlledBy = playerName;
+                }
+            }
+            
+            // Atualiza os selects
+            updatePlayerTokenSelects();
+            
+            // Salva e envia via WebSocket
+            autoSaveCurrentScene();
+            draw();
+        }
+        
+        // Atualiza os selects de tokens em todos os jogadores
+        function updatePlayerTokenSelects() {
+            const actualPlayers = connectedPlayers.filter(p => p.role === 'player');
+            
+            actualPlayers.forEach(player => {
+                const playerItems = document.querySelectorAll('.player-item');
+                playerItems.forEach(item => {
+                    const nameElement = item.querySelector('.player-name');
+                    if (nameElement && nameElement.textContent === player.player_name) {
+                        const select = item.querySelector('select');
+                        if (select) {
+                            const currentValue = select.value;
+                            select.innerHTML = '<option value="">Nenhum</option>';
+                            
+                            tokens.forEach(token => {
+                                const option = document.createElement('option');
+                                option.value = token.id;
+                                option.textContent = `${token.name}${token.controlledBy && token.controlledBy !== player.player_name ? ' (em uso)' : ''}`;
+                                if (token.controlledBy === player.player_name) {
+                                    option.selected = true;
+                                }
+                                // Desabilita se já estiver atribuído a outro jogador
+                                if (token.controlledBy && token.controlledBy !== player.player_name) {
+                                    option.disabled = true;
+                                }
+                                select.appendChild(option);
+                            });
+                        }
+                    }
+                });
+            });
+        }
+        
         // ==================== WEBSOCKET MULTIPLAYER ====================
         const roomCode = "{{ room.code }}";
         let ws = null;
@@ -1684,17 +2001,38 @@
 
             ws.onopen = () => {
                 console.log('✅ WebSocket conectado à sala');
+                // Pedir estado inicial (inclui lista de membros)
+                ws.send(JSON.stringify({action: 'get_state'}));
             };
 
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 
-                if (data.type === 'member_joined') {
+                if (data.type === 'room_state' && data.data) {
+                    // Atualizar lista de jogadores
+                    if (data.data.members) {
+                        updatePlayersList(data.data.members);
+                    }
+                } else if (data.type === 'member_joined') {
                     console.log('👋 Jogador entrou:', data.member.player_name);
                     showPlayerNotification(`${data.member.player_name} entrou na sala`, '#4CAF50');
+                    // Atualizar lista de jogadores
+                    fetchPlayersList();
                 } else if (data.type === 'member_left') {
                     console.log('👋 Jogador saiu:', data.member.player_name);
                     showPlayerNotification(`${data.member.player_name} saiu da sala`, '#f44336');
+                    // Atualizar lista de jogadores
+                    fetchPlayersList();
+                } else if (data.type === 'token_moved') {
+                    // Jogador moveu um token
+                    console.log('🎭 Token movido por:', data.moved_by);
+                    const token = tokens.find(t => t.id === data.token_id);
+                    if (token) {
+                        token.gridX = data.gridX;
+                        token.gridY = data.gridY;
+                        draw();
+                        autoSaveCurrentScene();
+                    }
                 }
             };
 
@@ -1718,6 +2056,13 @@
             setTimeout(() => {
                 notification.remove();
             }, 3000);
+        }
+        
+        // Buscar lista de jogadores via WebSocket
+        function fetchPlayersList() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({action: 'get_state'}));
+            }
         }
 
             // Modificar autoSaveCurrentScene para enviar via WebSocket

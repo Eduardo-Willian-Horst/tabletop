@@ -832,6 +832,35 @@
                 ctx.strokeText(token.name, tokenX + tokenRadius, textY);
                 ctx.fillText(token.name, tokenX + tokenRadius, textY);
                 ctx.restore();
+                
+                // Indicador de controle do jogador
+                if (token.controlledBy) {
+                    ctx.save();
+                    const badgeX = tokenX + tokenRadius * 2 - 10;
+                    const badgeY = tokenY - 5;
+                    const badgeRadius = 15;
+                    
+                    // Círculo do badge
+                    ctx.beginPath();
+                    ctx.arc(badgeX, badgeY, badgeRadius, 0, Math.PI * 2);
+                    
+                    // Se é o token do jogador atual, destaque em verde
+                    ctx.fillStyle = token.controlledBy === playerName ? '#4CAF50' : '#2196F3';
+                    ctx.fill();
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
+                    // Iniciais do jogador
+                    ctx.font = `bold ${10}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#fff';
+                    const initials = token.controlledBy.substring(0, 2).toUpperCase();
+                    ctx.fillText(initials, badgeX, badgeY);
+                    
+                    ctx.restore();
+                }
             });
         }
         
@@ -1060,10 +1089,12 @@
                             id: tokenData.id,
                             name: tokenData.name,
                             image: img,
+                            imageSrc: tokenData.imageSrc,
                             size: tokenData.size,
                             gridX: tokenData.gridX,
                             gridY: tokenData.gridY,
-                            visible: tokenData.visible !== undefined ? tokenData.visible : true
+                            visible: tokenData.visible !== undefined ? tokenData.visible : true,
+                            controlledBy: tokenData.controlledBy || null
                         };
                         tokens.push(token);
                         loadedTokens++;
@@ -1576,7 +1607,7 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
         
-        // ==================== MODO JOGADOR (VISUALIZAÇÃO) ====================
+        // ==================== MODO JOGADOR (VISUALIZAÇÃO + CONTROLE DE TOKEN) ====================
 
         // Desabilitar sistema local de cenas (usar apenas do servidor)
         autoSaveCurrentScene = function() {}; // Desabilitar auto-save
@@ -1589,7 +1620,26 @@
         loadScenesFromDatabase = function() {};
         
         const roomCode = "{{ room.code }}";
+        const playerName = "{{ player_name }}";
         let ws = null;
+        
+        // Função para verificar se jogador pode mover o token
+        function canPlayerMoveToken(token) {
+            return token.controlledBy === playerName;
+        }
+        
+        // Enviar movimentação de token via WebSocket
+        function sendTokenMove(tokenId, gridX, gridY) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    action: 'move_token',
+                    token_id: tokenId,
+                    gridX: gridX,
+                    gridY: gridY
+                }));
+                console.log('📤 Movimentação enviada:', {tokenId, gridX, gridY});
+            }
+        }
 
         function connectWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -1613,6 +1663,15 @@
                     // Atualizar cena em tempo real
                     console.log('🔄 Atualização recebida do mestre:', data.scene_data);
                     loadState(data.scene_data);
+                } else if (data.type === 'token_moved') {
+                    // Token foi movido (por outro jogador ou mestre)
+                    console.log('🎭 Token movido:', data);
+                    const token = tokens.find(t => t.id === data.token_id);
+                    if (token) {
+                        token.gridX = data.gridX;
+                        token.gridY = data.gridY;
+                        draw();
+                    }
                 }
             };
 
@@ -1629,23 +1688,45 @@
         // Conectar WebSocket ao carregar
         connectWebSocket();
 
-        // Modo somente leitura - desabilitar interações de edição
-        // Permitir apenas navegação (pan e zoom)
-        const originalCanvasMouseDown = canvas.onmousedown;
+        // ==================== CONTROLE DE TOKENS PARA JOGADORES ====================
         
+        // Interceptar o mousedown ANTES do listener original para verificar permissão
         canvas.addEventListener('mousedown', function(e) {
-            // Verificar se clicou em token
             const token = getTokenAtPosition(e.clientX, e.clientY);
-            if (token) {
-                // Não permitir arraste de tokens
+            if (token && !canPlayerMoveToken(token)) {
+                // Se clicou em token que NÃO é seu, bloqueia
+                console.log('⛔ Este token não é seu');
                 e.stopPropagation();
+                e.preventDefault();
                 return false;
             }
-            // Permitir pan normal
-        }, true);
+            // Se é seu token ou não clicou em token, permite continuar
+            if (token && canPlayerMoveToken(token)) {
+                console.log('✅ Você pode mover este token');
+            }
+        }, true); // Capture phase = executa ANTES
+        
+        // Modificar o mouseup para enviar via WebSocket
+        const originalMouseUpHandler = canvas.onmouseup;
+        canvas.onmouseup = function(e) {
+            if (draggingToken) {
+                // Verifica se o jogador pode mover este token
+                if (canPlayerMoveToken(draggingToken)) {
+                    // Envia via WebSocket em vez de salvar localmente
+                    sendTokenMove(draggingToken.id, draggingToken.gridX, draggingToken.gridY);
+                    console.log('📤 Token movido:', draggingToken.name);
+                } else {
+                    // Se não pode mover, não faz nada (já foi bloqueado no mousedown)
+                    console.log('⛔ Movimentação não permitida');
+                }
+                canvas.style.cursor = 'grab';
+                draggingToken = null;
+            } else {
+                isDragging = false;
+            }
+        };
 
-        // Desabilitar qualquer criação/edição
-        console.log('👁️ Modo Visualização Ativo - Você está acompanhando o mestre em tempo real');
+        console.log('🎮 Modo Jogador Ativo - Mova seus tokens atribuídos!');
     </script>
 </body>
 </html>
