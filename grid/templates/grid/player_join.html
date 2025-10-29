@@ -3,9 +3,19 @@
 {% block title %}Entrar como Jogador - RPG Grid{% endblock %}
 
 {% block content %}
+<style>
+    #room_code {
+        text-transform: uppercase;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-align: center;
+    }
+</style>
+
 <div class="container">
     <h1>🎮 Entrar como Jogador</h1>
-    <p style="text-align: center; color: #666; margin-bottom: 30px;">
+    <p style="text-align: center; color: #888; margin-bottom: 30px; font-size: 14px;">
         Digite seu nome e o código da sala fornecido pelo mestre
     </p>
 
@@ -18,7 +28,7 @@
 
         <div class="form-group">
             <label for="room_code">Código da Sala</label>
-            <input type="text" id="room_code" name="room_code" placeholder="Ex: ABC123" required style="text-transform: uppercase;">
+            <input type="text" id="room_code" name="room_code" placeholder="Ex: ABC123" required>
         </div>
 
         <button type="submit">🚪 Entrar na Sala</button>

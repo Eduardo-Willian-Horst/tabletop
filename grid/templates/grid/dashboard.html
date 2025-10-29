@@ -4,8 +4,15 @@
 
 {% block content %}
 <style>
+    body {
+        display: block;
+        align-items: flex-start;
+    }
+
     .container {
-        max-width: 800px;
+        max-width: 900px;
+        margin-top: 30px;
+        margin-bottom: 50px;
     }
 
     .header {
@@ -15,23 +22,41 @@
         margin-bottom: 30px;
     }
 
+    .header h1 {
+        margin: 0;
+    }
+
+    .header p {
+        color: #888;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
     .logout-btn {
-        padding: 8px 16px;
+        padding: 10px 20px;
         background: #f44336;
         width: auto;
         font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    .logout-btn:hover {
+        background: #da190b;
+        box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
     }
 
     .create-form {
         margin-bottom: 30px;
         padding: 20px;
-        background: #f5f5f5;
+        background: rgba(20, 20, 20, 0.6);
         border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .create-form h3 {
         margin-bottom: 15px;
-        color: #333;
+        color: #4CAF50;
+        font-size: 18px;
     }
 
     .create-form form {
@@ -48,19 +73,30 @@
         padding: 12px 30px;
     }
 
-    .rooms {
-        margin-top: 30px;
+    .rooms h2 {
+        color: #fff;
+        margin-bottom: 20px;
+        text-align: left;
+        font-size: 22px;
     }
 
     .room-card {
-        background: white;
+        background: rgba(30, 30, 30, 0.8);
         padding: 20px;
         border-radius: 12px;
         margin-bottom: 15px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         display: flex;
         justify-content: space-between;
         align-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.2s;
+    }
+
+    .room-card:hover {
+        background: rgba(40, 40, 40, 0.9);
+        border-color: #4CAF50;
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
     }
 
     .room-info {
@@ -69,23 +105,25 @@
 
     .room-info h3 {
         margin: 0 0 10px 0;
-        color: #333;
+        color: #fff;
+        font-size: 20px;
     }
 
     .room-code {
         display: inline-block;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #4CAF50;
         color: white;
-        padding: 8px 16px;
-        border-radius: 20px;
+        padding: 6px 14px;
+        border-radius: 8px;
         font-weight: 600;
-        font-size: 18px;
-        margin-bottom: 5px;
+        font-size: 16px;
+        margin-bottom: 8px;
     }
 
     .room-meta {
         color: #888;
         font-size: 13px;
+        margin-top: 5px;
     }
 
     .room-actions {
@@ -102,12 +140,26 @@
 
     .room-actions button {
         background: #f44336;
+        transition: all 0.2s;
+    }
+
+    .room-actions button:hover {
+        background: #da190b;
+        box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
     }
 
     .empty-state {
         text-align: center;
-        padding: 40px;
+        padding: 60px 40px;
         color: #888;
+        background: rgba(20, 20, 20, 0.4);
+        border-radius: 12px;
+        border: 2px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    .empty-state p {
+        margin: 10px 0;
+        font-size: 15px;
     }
 </style>
 
