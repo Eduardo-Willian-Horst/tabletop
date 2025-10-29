@@ -1603,14 +1603,15 @@
 
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
+                console.log('📨 Mensagem WebSocket recebida:', data);
                 
                 if (data.type === 'room_state' && data.data && data.data.scene_data) {
                     // Carregar estado inicial
-                    console.log('📥 Estado inicial recebido');
+                    console.log('📥 Estado inicial recebido:', data.data.scene_data);
                     loadState(data.data.scene_data);
                 } else if (data.type === 'scene_update' && data.scene_data) {
                     // Atualizar cena em tempo real
-                    console.log('🔄 Atualização recebida do mestre');
+                    console.log('🔄 Atualização recebida do mestre:', data.scene_data);
                     loadState(data.scene_data);
                 }
             };

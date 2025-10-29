@@ -1727,9 +1727,27 @@
 
                 // Enviar update para jogadores via WebSocket
                 if (ws && ws.readyState === WebSocket.OPEN && currentScene) {
+                    const stateData = captureCurrentState();
+                    console.log('📤 Enviando atualização via WebSocket:', stateData);
                     ws.send(JSON.stringify({
                         action: 'update_scene',
-                        scene_data: captureCurrentState()
+                        scene_data: stateData
+                    }));
+                }
+            };
+            
+            // Modificar switchToScene para também enviar via WebSocket após trocar
+            const originalSwitchToScene = switchToScene;
+            switchToScene = async function(scene, saveCurrentFirst = true) {
+                await originalSwitchToScene(scene, saveCurrentFirst);
+                
+                // Após trocar de cena, enviar para jogadores
+                if (ws && ws.readyState === WebSocket.OPEN && currentScene) {
+                    const stateData = captureCurrentState();
+                    console.log('📤 Enviando nova cena via WebSocket:', stateData);
+                    ws.send(JSON.stringify({
+                        action: 'update_scene',
+                        scene_data: stateData
                     }));
                 }
             };

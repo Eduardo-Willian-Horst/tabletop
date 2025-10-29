@@ -2,7 +2,7 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import User
-from .models import Room, RoomMember
+from .models import Room, RoomMember, Scene
 
 class GameRoomConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -161,10 +161,15 @@ class GameRoomConsumer(AsyncWebsocketConsumer):
     def get_room_data(self):
         try:
             room = Room.objects.get(code=self.room_code)
+            
+            # Buscar cena ativa da sala
+            active_scene = room.scenes.filter(is_active=True).first()
+            scene_data = active_scene.scene_data if active_scene else {}
+            
             return {
                 'code': room.code,
                 'name': room.name,
-                'scene_data': room.current_scene_data or {},
+                'scene_data': scene_data,
                 'members': list(room.members.values('player_name', 'role', 'is_online'))
             }
         except Room.DoesNotExist:
@@ -174,8 +179,17 @@ class GameRoomConsumer(AsyncWebsocketConsumer):
     def save_scene_data(self, scene_data):
         try:
             room = Room.objects.get(code=self.room_code)
-            room.current_scene_data = scene_data
-            room.save()
+            
+            # Atualizar cena ativa
+            active_scene = room.scenes.filter(is_active=True).first()
+            if active_scene:
+                active_scene.scene_data = scene_data
+                active_scene.save()
+            
+            # Também salvar em current_scene_data para compatibilidade (se existir)
+            if hasattr(room, 'current_scene_data'):
+                room.current_scene_data = scene_data
+                room.save()
         except Room.DoesNotExist:
             pass
     

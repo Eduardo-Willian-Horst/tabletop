@@ -240,10 +240,6 @@ def switch_scene_api(request, room_code, scene_id):
     scene.is_active = True
     scene.save()
     
-    # Atualizar current_scene_data da room
-    room.current_scene_data = scene.scene_data
-    room.save()
-    
     return JsonResponse({
         'id': scene.id,
         'name': scene.name,
