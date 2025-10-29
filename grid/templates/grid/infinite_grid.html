@@ -189,6 +189,184 @@
             color: #4CAF50;
             font-weight: 600;
         }
+
+        .token-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(30, 30, 30, 0.95);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            min-width: 280px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .token-panel h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .token-form {
+            border: 2px dashed #4CAF50;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background: rgba(76, 175, 80, 0.05);
+        }
+
+        .token-form input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #4CAF50;
+            border-radius: 6px;
+            background: #2a2a2a;
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .token-form input[type="text"]:focus {
+            outline: none;
+            border-color: #45a049;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .token-form input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #4CAF50;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #2a2a2a;
+            color: #aaa;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .token-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .token-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .token-item:hover {
+            background: #333;
+            transform: translateX(5px);
+        }
+
+        .token-item.selected {
+            border: 2px solid #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .token-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #4CAF50;
+        }
+
+        .token-info {
+            flex: 1;
+            color: #fff;
+        }
+
+        .token-info .name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .token-info .position {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .token-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .token-toggle-visibility,
+        .token-delete {
+            padding: 6px 12px;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            min-width: 36px;
+        }
+
+        .token-toggle-visibility {
+            background: #2196F3;
+        }
+
+        .token-toggle-visibility:hover {
+            background: #0b7dda;
+        }
+
+        .token-toggle-visibility.hidden {
+            background: #666;
+        }
+
+        .token-toggle-visibility.hidden:hover {
+            background: #555;
+        }
+
+        .token-delete {
+            background: #f44336;
+        }
+
+        .token-delete:hover {
+            background: #da190b;
+        }
+
+        .token-item.token-hidden {
+            opacity: 0.5;
+        }
+
+        .token-item.token-hidden .token-preview {
+            filter: grayscale(100%);
+        }
+
+        .token-size-control {
+            margin-top: 10px;
+        }
+
+        .token-size-control label {
+            display: block;
+            color: #aaa;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+
+        .token-size-control input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #4CAF50;
+            border-radius: 6px;
+            background: #2a2a2a;
+            color: #fff;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
@@ -256,6 +434,29 @@
         <button id="resetView">🔄 Resetar Visualização</button>
     </div>
     
+    <div class="token-panel">
+        <h3>🎭 Tokens</h3>
+        
+        <div class="token-form">
+            <input type="text" id="tokenName" placeholder="Nome do Token" />
+            <input type="file" id="tokenImage" accept="image/*" />
+            <div class="token-size-control">
+                <label>Tamanho (células da grid)</label>
+                <input type="number" id="tokenSize" min="1" max="10" value="1" />
+            </div>
+            <button id="createToken">➕ Criar Token</button>
+        </div>
+        
+        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+            <button id="showAllTokens" style="flex: 1; padding: 8px; font-size: 12px;">👁️ Mostrar Todos</button>
+            <button id="hideAllTokens" style="flex: 1; padding: 8px; font-size: 12px;">👁️‍🗨️ Ocultar Todos</button>
+        </div>
+        
+        <div class="token-list" id="tokenList">
+            <!-- Tokens serão adicionados aqui -->
+        </div>
+    </div>
+    
     <div class="info">
         <div>🖱️ <span>Arraste</span> para mover | 🔍 <span>Scroll</span> para zoom</div>
         <div style="margin-top: 5px;">Zoom: <span id="zoomLevel">100%</span></div>
@@ -288,6 +489,14 @@
         let backgroundImage = null;
         let imageOpacity = 1.0;
         let imageScale = 1; // Escala da imagem em relação à grid
+        
+        // Sistema de tokens
+        let tokens = [];
+        let selectedToken = null;
+        let draggingToken = null;
+        let tokenDragOffsetX = 0;
+        let tokenDragOffsetY = 0;
+        let nextTokenId = 1;
         
         // Controle de arraste
         let isDragging = false;
@@ -353,38 +562,295 @@
             ctx.stroke();
             ctx.restore();
             
+            // Desenha tokens
+            drawTokens();
+            
             // Atualiza display do zoom
             document.getElementById('zoomLevel').textContent = Math.round(scale * 100) + '%';
         }
         
-        // Controle de mouse - Pan
+        // Função para desenhar tokens
+        function drawTokens() {
+            tokens.forEach(token => {
+                // Pula tokens invisíveis
+                if (!token.visible) return;
+                
+                const tokenRadius = (gridSize * scale * token.size) / 2;
+                const tokenX = token.gridX * gridSize * scale + offsetX;
+                const tokenY = token.gridY * gridSize * scale + offsetY;
+                
+                ctx.save();
+                
+                // Sombra para o token
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                ctx.shadowBlur = 10;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 4;
+                
+                // Círculo de fundo
+                ctx.beginPath();
+                ctx.arc(tokenX + tokenRadius, tokenY + tokenRadius, tokenRadius, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff';
+                ctx.fill();
+                
+                // Borda do token
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = token === selectedToken ? '#4CAF50' : '#333';
+                ctx.stroke();
+                
+                // Desenha a imagem dentro do círculo (clip)
+                if (token.image) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(tokenX + tokenRadius, tokenY + tokenRadius, tokenRadius - 2, 0, Math.PI * 2);
+                    ctx.clip();
+                    
+                    const imgSize = tokenRadius * 2 - 4;
+                    ctx.drawImage(
+                        token.image,
+                        tokenX + 2,
+                        tokenY + 2,
+                        imgSize,
+                        imgSize
+                    );
+                    ctx.restore();
+                }
+                
+                ctx.restore();
+                
+                // Desenha o nome abaixo do token
+                ctx.save();
+                ctx.font = `bold ${Math.max(12, 14 * scale)}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#fff';
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 3;
+                
+                const textY = tokenY + tokenRadius * 2 + 20;
+                ctx.strokeText(token.name, tokenX + tokenRadius, textY);
+                ctx.fillText(token.name, tokenX + tokenRadius, textY);
+                ctx.restore();
+            });
+        }
+        
+        // Verifica se o mouse está sobre um token
+        function getTokenAtPosition(mouseX, mouseY) {
+            // Verifica em ordem reversa para pegar o token no topo
+            for (let i = tokens.length - 1; i >= 0; i--) {
+                const token = tokens[i];
+                const tokenRadius = (gridSize * scale * token.size) / 2;
+                const tokenX = token.gridX * gridSize * scale + offsetX + tokenRadius;
+                const tokenY = token.gridY * gridSize * scale + offsetY + tokenRadius;
+                
+                const dx = mouseX - tokenX;
+                const dy = mouseY - tokenY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance <= tokenRadius) {
+                    return token;
+                }
+            }
+            return null;
+        }
+        
+        // Snap posição para a grid
+        function snapToGrid(x, y) {
+            const gridX = Math.round((x - offsetX) / (gridSize * scale));
+            const gridY = Math.round((y - offsetY) / (gridSize * scale));
+            return { gridX, gridY };
+        }
+        
+        // Atualiza a lista visual de tokens
+        function updateTokenList() {
+            const tokenList = document.getElementById('tokenList');
+            tokenList.innerHTML = '';
+            
+            tokens.forEach(token => {
+                const item = document.createElement('div');
+                item.className = 'token-item' + 
+                    (token === selectedToken ? ' selected' : '') +
+                    (!token.visible ? ' token-hidden' : '');
+                
+                const preview = document.createElement('img');
+                preview.className = 'token-preview';
+                preview.src = token.image.src;
+                
+                const info = document.createElement('div');
+                info.className = 'token-info';
+                
+                const name = document.createElement('div');
+                name.className = 'name';
+                name.textContent = token.name + (!token.visible ? ' (Oculto)' : '');
+                
+                const position = document.createElement('div');
+                position.className = 'position';
+                position.textContent = `Posição: (${token.gridX}, ${token.gridY})`;
+                
+                info.appendChild(name);
+                info.appendChild(position);
+                
+                // Container para os botões
+                const actions = document.createElement('div');
+                actions.className = 'token-actions';
+                
+                // Botão de toggle de visibilidade
+                const toggleBtn = document.createElement('button');
+                toggleBtn.className = 'token-toggle-visibility' + (!token.visible ? ' hidden' : '');
+                toggleBtn.textContent = token.visible ? '👁️' : '👁️‍🗨️';
+                toggleBtn.title = token.visible ? 'Ocultar token' : 'Mostrar token';
+                toggleBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    toggleTokenVisibility(token);
+                };
+                
+                // Botão de deletar
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'token-delete';
+                deleteBtn.textContent = '🗑️';
+                deleteBtn.title = 'Deletar token';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteToken(token);
+                };
+                
+                actions.appendChild(toggleBtn);
+                actions.appendChild(deleteBtn);
+                
+                item.appendChild(preview);
+                item.appendChild(info);
+                item.appendChild(actions);
+                
+                item.onclick = () => {
+                    selectedToken = token;
+                    updateTokenList();
+                    draw();
+                };
+                
+                tokenList.appendChild(item);
+            });
+        }
+        
+        // Toggle visibilidade do token
+        function toggleTokenVisibility(token) {
+            token.visible = !token.visible;
+            updateTokenList();
+            draw();
+        }
+        
+        // Cria um novo token
+        function createToken(name, imageSrc, size) {
+            const img = new Image();
+            img.onload = () => {
+                const token = {
+                    id: nextTokenId++,
+                    name: name,
+                    image: img,
+                    size: size,
+                    gridX: 0, // Começa no centro
+                    gridY: 0,
+                    visible: true // Visível por padrão
+                };
+                tokens.push(token);
+                updateTokenList();
+                draw();
+            };
+            img.src = imageSrc;
+        }
+        
+        // Deleta um token
+        function deleteToken(token) {
+            const index = tokens.indexOf(token);
+            if (index > -1) {
+                tokens.splice(index, 1);
+                if (selectedToken === token) {
+                    selectedToken = null;
+                }
+                updateTokenList();
+                draw();
+            }
+        }
+        
+        // Controle de mouse - Pan e Tokens
         canvas.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            lastX = e.clientX;
-            lastY = e.clientY;
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+            
+            // Verifica se clicou em um token
+            const clickedToken = getTokenAtPosition(mouseX, mouseY);
+            
+            if (clickedToken) {
+                // Inicia arraste do token
+                draggingToken = clickedToken;
+                selectedToken = clickedToken;
+                
+                const tokenRadius = (gridSize * scale * clickedToken.size) / 2;
+                const tokenX = clickedToken.gridX * gridSize * scale + offsetX + tokenRadius;
+                const tokenY = clickedToken.gridY * gridSize * scale + offsetY + tokenRadius;
+                
+                tokenDragOffsetX = mouseX - tokenX;
+                tokenDragOffsetY = mouseY - tokenY;
+                
+                canvas.style.cursor = 'grabbing';
+                updateTokenList();
+            } else {
+                // Inicia pan do canvas
+                isDragging = true;
+                lastX = mouseX;
+                lastY = mouseY;
+                selectedToken = null;
+                updateTokenList();
+            }
+            
+            draw();
         });
         
         canvas.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                const deltaX = e.clientX - lastX;
-                const deltaY = e.clientY - lastY;
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+            
+            if (draggingToken) {
+                // Arrasta o token
+                const tokenRadius = (gridSize * scale * draggingToken.size) / 2;
+                const newX = mouseX - tokenDragOffsetX - tokenRadius;
+                const newY = mouseY - tokenDragOffsetY - tokenRadius;
+                
+                const snapped = snapToGrid(newX, newY);
+                draggingToken.gridX = snapped.gridX;
+                draggingToken.gridY = snapped.gridY;
+                
+                updateTokenList();
+                draw();
+            } else if (isDragging) {
+                // Pan do canvas
+                const deltaX = mouseX - lastX;
+                const deltaY = mouseY - lastY;
                 
                 offsetX += deltaX;
                 offsetY += deltaY;
                 
-                lastX = e.clientX;
-                lastY = e.clientY;
+                lastX = mouseX;
+                lastY = mouseY;
                 
                 draw();
+            } else {
+                // Atualiza cursor baseado na posição
+                const hoverToken = getTokenAtPosition(mouseX, mouseY);
+                canvas.style.cursor = hoverToken ? 'grab' : 'grab';
             }
         });
         
         canvas.addEventListener('mouseup', () => {
+            if (draggingToken) {
+                canvas.style.cursor = 'grab';
+            }
             isDragging = false;
+            draggingToken = null;
         });
         
         canvas.addEventListener('mouseleave', () => {
             isDragging = false;
+            draggingToken = null;
+            canvas.style.cursor = 'grab';
         });
         
         // Controle de zoom com scroll
@@ -408,6 +874,52 @@
             offsetY = mouseY - (gridY * newScale / oldScale);
             
             scale = newScale;
+            draw();
+        });
+        
+        // Controles de tokens
+        document.getElementById('createToken').addEventListener('click', () => {
+            const nameInput = document.getElementById('tokenName');
+            const imageInput = document.getElementById('tokenImage');
+            const sizeInput = document.getElementById('tokenSize');
+            
+            const name = nameInput.value.trim();
+            const file = imageInput.files[0];
+            const size = parseInt(sizeInput.value);
+            
+            if (!name) {
+                alert('Por favor, insira um nome para o token!');
+                return;
+            }
+            
+            if (!file) {
+                alert('Por favor, selecione uma imagem para o token!');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                createToken(name, event.target.result, size);
+                
+                // Limpa os campos
+                nameInput.value = '';
+                imageInput.value = '';
+                sizeInput.value = '1';
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        // Mostrar todos os tokens
+        document.getElementById('showAllTokens').addEventListener('click', () => {
+            tokens.forEach(token => token.visible = true);
+            updateTokenList();
+            draw();
+        });
+        
+        // Ocultar todos os tokens
+        document.getElementById('hideAllTokens').addEventListener('click', () => {
+            tokens.forEach(token => token.visible = false);
+            updateTokenList();
             draw();
         });
         
