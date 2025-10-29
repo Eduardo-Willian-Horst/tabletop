@@ -367,10 +367,154 @@
             color: #fff;
             font-size: 13px;
         }
+
+        .scene-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(30, 30, 30, 0.95);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            min-width: 320px;
+            max-width: 400px;
+        }
+
+        .scene-panel h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .scene-form {
+            margin-bottom: 15px;
+        }
+
+        .scene-form input[type="text"] {
+            width: calc(100% - 60px);
+            padding: 10px;
+            border: 1px solid #4CAF50;
+            border-radius: 6px 0 0 6px;
+            background: #2a2a2a;
+            color: #fff;
+            font-size: 14px;
+            float: left;
+        }
+
+        .scene-form button {
+            width: 60px;
+            padding: 10px;
+            border: none;
+            border-radius: 0 6px 6px 0;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            float: left;
+        }
+
+        .scene-form::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        .scene-list {
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+
+        .scene-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .scene-item:hover {
+            background: #333;
+            transform: translateX(5px);
+        }
+
+        .scene-item.active {
+            border: 2px solid #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .scene-icon {
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a1a;
+            border-radius: 8px;
+        }
+
+        .scene-info {
+            flex: 1;
+            color: #fff;
+        }
+
+        .scene-info .name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .scene-info .meta {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .scene-delete {
+            padding: 8px 12px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .scene-delete:hover {
+            background: #da190b;
+        }
+
+        .autosave-indicator {
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1001;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .autosave-indicator.show {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
+    
+    <div class="autosave-indicator" id="autosaveIndicator">💾 Cena salva!</div>
     
     <div class="controls">
         <h3>⚙️ Controles</h3>
@@ -457,6 +601,19 @@
         </div>
     </div>
     
+    <div class="scene-panel">
+        <h3>🎬 Cenas</h3>
+        
+        <div class="scene-form">
+            <input type="text" id="sceneName" placeholder="Nome da cena" />
+            <button id="createScene">➕</button>
+        </div>
+        
+        <div class="scene-list" id="sceneList">
+            <!-- Cenas serão adicionadas aqui -->
+        </div>
+    </div>
+    
     <div class="info">
         <div>🖱️ <span>Arraste</span> para mover | 🔍 <span>Scroll</span> para zoom</div>
         <div style="margin-top: 5px;">Zoom: <span id="zoomLevel">100%</span></div>
@@ -497,6 +654,12 @@
         let tokenDragOffsetX = 0;
         let tokenDragOffsetY = 0;
         let nextTokenId = 1;
+        
+        // Sistema de cenas
+        let scenes = [];
+        let currentScene = null;
+        let nextSceneId = 1;
+        let autoSaveTimeout = null;
         
         // Controle de arraste
         let isDragging = false;
@@ -735,6 +898,7 @@
             token.visible = !token.visible;
             updateTokenList();
             draw();
+            autoSaveCurrentScene();
         }
         
         // Cria um novo token
@@ -767,7 +931,301 @@
                 }
                 updateTokenList();
                 draw();
+                autoSaveCurrentScene();
             }
+        }
+        
+        // ==================== SISTEMA DE CENAS ====================
+        
+        // Salva o estado atual da cena
+        function captureCurrentState() {
+            return {
+                tokens: tokens.map(token => ({
+                    id: token.id,
+                    name: token.name,
+                    imageSrc: token.image.src,
+                    size: token.size,
+                    gridX: token.gridX,
+                    gridY: token.gridY,
+                    visible: token.visible
+                })),
+                backgroundImage: backgroundImage ? backgroundImage.src : null,
+                imageOpacity: imageOpacity,
+                imageScale: imageScale,
+                bgColor: bgColor,
+                gridColor: gridColor,
+                gridOpacity: gridOpacity,
+                gridSize: gridSize,
+                lineWidth: lineWidth,
+                offsetX: offsetX,
+                offsetY: offsetY,
+                scale: scale,
+                nextTokenId: nextTokenId
+            };
+        }
+        
+        // Carrega um estado na cena atual
+        function loadState(state) {
+            // Limpa tokens atuais
+            tokens = [];
+            selectedToken = null;
+            draggingToken = null;
+            
+            // Restaura configurações
+            bgColor = state.bgColor || '#1a1a1a';
+            gridColor = state.gridColor || '#333333';
+            gridOpacity = state.gridOpacity !== undefined ? state.gridOpacity : 1.0;
+            gridSize = state.gridSize || 50;
+            lineWidth = state.lineWidth || 1;
+            imageOpacity = state.imageOpacity !== undefined ? state.imageOpacity : 1.0;
+            imageScale = state.imageScale || 1;
+            offsetX = state.offsetX || 0;
+            offsetY = state.offsetY || 0;
+            scale = state.scale || 1;
+            nextTokenId = state.nextTokenId || 1;
+            
+            // Atualiza controles da interface
+            document.getElementById('bgColor').value = bgColor;
+            document.getElementById('gridColor').value = gridColor;
+            document.getElementById('gridSize').value = gridSize;
+            document.getElementById('lineWidth').value = lineWidth;
+            document.getElementById('imageOpacity').value = Math.round(imageOpacity * 100);
+            document.getElementById('gridOpacity').value = Math.round(gridOpacity * 100);
+            document.getElementById('imageScale').value = Math.round(imageScale * 100);
+            
+            document.getElementById('gridSizeValue').textContent = gridSize + 'px';
+            document.getElementById('lineWidthValue').textContent = lineWidth + 'px';
+            document.getElementById('imageOpacityValue').textContent = Math.round(imageOpacity * 100) + '%';
+            document.getElementById('gridOpacityValue').textContent = Math.round(gridOpacity * 100) + '%';
+            document.getElementById('imageScaleValue').textContent = imageScale.toFixed(1) + 'x';
+            
+            // Carrega imagem de fundo
+            if (state.backgroundImage) {
+                const img = new Image();
+                img.onload = () => {
+                    backgroundImage = img;
+                    draw();
+                };
+                img.src = state.backgroundImage;
+            } else {
+                backgroundImage = null;
+            }
+            
+            // Carrega tokens
+            if (state.tokens && state.tokens.length > 0) {
+                let loadedTokens = 0;
+                state.tokens.forEach(tokenData => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const token = {
+                            id: tokenData.id,
+                            name: tokenData.name,
+                            image: img,
+                            size: tokenData.size,
+                            gridX: tokenData.gridX,
+                            gridY: tokenData.gridY,
+                            visible: tokenData.visible !== undefined ? tokenData.visible : true
+                        };
+                        tokens.push(token);
+                        loadedTokens++;
+                        
+                        if (loadedTokens === state.tokens.length) {
+                            updateTokenList();
+                            draw();
+                        }
+                    };
+                    img.src = tokenData.imageSrc;
+                });
+            } else {
+                updateTokenList();
+                draw();
+            }
+        }
+        
+        // Auto-save com debounce
+        function autoSaveCurrentScene() {
+            if (!currentScene) return;
+            
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                saveCurrentScene();
+                showAutosaveIndicator();
+            }, 500);
+        }
+        
+        // Salva a cena atual
+        function saveCurrentScene() {
+            if (!currentScene) return;
+            
+            currentScene.state = captureCurrentState();
+            currentScene.lastModified = new Date().toISOString();
+            saveScenesToStorage();
+        }
+        
+        // Mostra indicador de auto-save
+        function showAutosaveIndicator() {
+            const indicator = document.getElementById('autosaveIndicator');
+            indicator.classList.add('show');
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 2000);
+        }
+        
+        // Salva todas as cenas no LocalStorage
+        function saveScenesToStorage() {
+            const scenesData = scenes.map(scene => ({
+                id: scene.id,
+                name: scene.name,
+                created: scene.created,
+                lastModified: scene.lastModified,
+                state: scene.state
+            }));
+            localStorage.setItem('rpg_scenes', JSON.stringify(scenesData));
+            localStorage.setItem('rpg_nextSceneId', nextSceneId.toString());
+            if (currentScene) {
+                localStorage.setItem('rpg_currentSceneId', currentScene.id.toString());
+            }
+        }
+        
+        // Carrega cenas do LocalStorage
+        function loadScenesFromStorage() {
+            const scenesData = localStorage.getItem('rpg_scenes');
+            if (scenesData) {
+                scenes = JSON.parse(scenesData);
+            }
+            
+            const savedNextId = localStorage.getItem('rpg_nextSceneId');
+            if (savedNextId) {
+                nextSceneId = parseInt(savedNextId);
+            }
+            
+            const currentSceneId = localStorage.getItem('rpg_currentSceneId');
+            if (currentSceneId && scenes.length > 0) {
+                const scene = scenes.find(s => s.id === parseInt(currentSceneId));
+                if (scene) {
+                    switchToScene(scene, false);
+                }
+            }
+            
+            updateSceneList();
+        }
+        
+        // Cria uma nova cena
+        function createScene(name) {
+            const scene = {
+                id: nextSceneId++,
+                name: name,
+                created: new Date().toISOString(),
+                lastModified: new Date().toISOString(),
+                state: captureCurrentState()
+            };
+            
+            scenes.push(scene);
+            saveScenesToStorage();
+            updateSceneList();
+            switchToScene(scene);
+        }
+        
+        // Troca para uma cena
+        function switchToScene(scene, saveCurrentFirst = true) {
+            if (saveCurrentFirst && currentScene) {
+                saveCurrentScene();
+            }
+            
+            currentScene = scene;
+            loadState(scene.state);
+            updateSceneList();
+            saveScenesToStorage();
+        }
+        
+        // Deleta uma cena
+        function deleteScene(scene) {
+            const index = scenes.indexOf(scene);
+            if (index > -1) {
+                scenes.splice(index, 1);
+                
+                if (currentScene === scene) {
+                    if (scenes.length > 0) {
+                        switchToScene(scenes[0], false);
+                    } else {
+                        currentScene = null;
+                        // Reseta para estado limpo
+                        tokens = [];
+                        backgroundImage = null;
+                        offsetX = 0;
+                        offsetY = 0;
+                        scale = 1;
+                        updateTokenList();
+                        draw();
+                    }
+                }
+                
+                saveScenesToStorage();
+                updateSceneList();
+            }
+        }
+        
+        // Atualiza a lista visual de cenas
+        function updateSceneList() {
+            const sceneList = document.getElementById('sceneList');
+            sceneList.innerHTML = '';
+            
+            if (scenes.length === 0) {
+                const empty = document.createElement('div');
+                empty.style.color = '#888';
+                empty.style.textAlign = 'center';
+                empty.style.padding = '20px';
+                empty.textContent = 'Nenhuma cena criada';
+                sceneList.appendChild(empty);
+                return;
+            }
+            
+            scenes.forEach(scene => {
+                const item = document.createElement('div');
+                item.className = 'scene-item' + (scene === currentScene ? ' active' : '');
+                
+                const icon = document.createElement('div');
+                icon.className = 'scene-icon';
+                icon.textContent = '🎬';
+                
+                const info = document.createElement('div');
+                info.className = 'scene-info';
+                
+                const name = document.createElement('div');
+                name.className = 'name';
+                name.textContent = scene.name;
+                
+                const meta = document.createElement('div');
+                meta.className = 'meta';
+                const tokenCount = scene.state.tokens ? scene.state.tokens.length : 0;
+                meta.textContent = `${tokenCount} token(s)`;
+                
+                info.appendChild(name);
+                info.appendChild(meta);
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'scene-delete';
+                deleteBtn.textContent = '🗑️';
+                deleteBtn.title = 'Deletar cena';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (confirm(`Deletar a cena "${scene.name}"?`)) {
+                        deleteScene(scene);
+                    }
+                };
+                
+                item.appendChild(icon);
+                item.appendChild(info);
+                item.appendChild(deleteBtn);
+                
+                item.onclick = () => {
+                    if (scene !== currentScene) {
+                        switchToScene(scene);
+                    }
+                };
+                
+                sceneList.appendChild(item);
+            });
         }
         
         // Controle de mouse - Pan e Tokens
@@ -820,6 +1278,7 @@
                 
                 updateTokenList();
                 draw();
+                autoSaveCurrentScene();
             } else if (isDragging) {
                 // Pan do canvas
                 const deltaX = mouseX - lastX;
@@ -877,6 +1336,27 @@
             draw();
         });
         
+        // Controles de cenas
+        document.getElementById('createScene').addEventListener('click', () => {
+            const nameInput = document.getElementById('sceneName');
+            const name = nameInput.value.trim();
+            
+            if (!name) {
+                alert('Por favor, insira um nome para a cena!');
+                return;
+            }
+            
+            createScene(name);
+            nameInput.value = '';
+        });
+        
+        // Enter para criar cena
+        document.getElementById('sceneName').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('createScene').click();
+            }
+        });
+        
         // Controles de tokens
         document.getElementById('createToken').addEventListener('click', () => {
             const nameInput = document.getElementById('tokenName');
@@ -905,6 +1385,8 @@
                 nameInput.value = '';
                 imageInput.value = '';
                 sizeInput.value = '1';
+                
+                autoSaveCurrentScene();
             };
             reader.readAsDataURL(file);
         });
@@ -914,6 +1396,7 @@
             tokens.forEach(token => token.visible = true);
             updateTokenList();
             draw();
+            autoSaveCurrentScene();
         });
         
         // Ocultar todos os tokens
@@ -921,6 +1404,7 @@
             tokens.forEach(token => token.visible = false);
             updateTokenList();
             draw();
+            autoSaveCurrentScene();
         });
         
         // Controles da interface
@@ -933,6 +1417,7 @@
                     img.onload = () => {
                         backgroundImage = img;
                         draw();
+                        autoSaveCurrentScene();
                     };
                     img.src = event.target.result;
                 };
@@ -944,46 +1429,54 @@
             imageOpacity = parseInt(e.target.value) / 100;
             document.getElementById('imageOpacityValue').textContent = e.target.value + '%';
             draw();
+            autoSaveCurrentScene();
         });
         
         document.getElementById('imageScale').addEventListener('input', (e) => {
             imageScale = parseInt(e.target.value) / 100;
             document.getElementById('imageScaleValue').textContent = imageScale.toFixed(1) + 'x';
             draw();
+            autoSaveCurrentScene();
         });
         
         document.getElementById('bgColor').addEventListener('input', (e) => {
             bgColor = e.target.value;
             draw();
+            autoSaveCurrentScene();
         });
         
         document.getElementById('gridColor').addEventListener('input', (e) => {
             gridColor = e.target.value;
             draw();
+            autoSaveCurrentScene();
         });
         
         document.getElementById('gridOpacity').addEventListener('input', (e) => {
             gridOpacity = parseInt(e.target.value) / 100;
             document.getElementById('gridOpacityValue').textContent = e.target.value + '%';
             draw();
+            autoSaveCurrentScene();
         });
         
         document.getElementById('gridSize').addEventListener('input', (e) => {
             gridSize = parseInt(e.target.value);
             document.getElementById('gridSizeValue').textContent = gridSize + 'px';
             draw();
+            autoSaveCurrentScene();
         });
         
         document.getElementById('lineWidth').addEventListener('input', (e) => {
             lineWidth = parseFloat(e.target.value);
             document.getElementById('lineWidthValue').textContent = lineWidth + 'px';
             draw();
+            autoSaveCurrentScene();
         });
         
         document.getElementById('removeImage').addEventListener('click', () => {
             backgroundImage = null;
             document.getElementById('bgImage').value = '';
             draw();
+            autoSaveCurrentScene();
         });
         
         document.getElementById('resetView').addEventListener('click', () => {
@@ -991,6 +1484,7 @@
             offsetY = 0;
             scale = 1;
             draw();
+            autoSaveCurrentScene();
         });
         
         // Suporte para touch (mobile)
@@ -1042,6 +1536,14 @@
         // Inicializa
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
+        
+        // Carrega cenas salvas
+        loadScenesFromStorage();
+        
+        // Se não houver cenas, cria uma padrão
+        if (scenes.length === 0) {
+            createScene('Cena Principal');
+        }
     </script>
 </body>
 </html>

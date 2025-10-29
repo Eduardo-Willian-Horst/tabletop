@@ -8,6 +8,13 @@ Um projeto Django com uma grid infinita interativa e otimizada.
 - **Zoom**: Use a roda do mouse para dar zoom in/out (10% até 1000%)
 - **Pan**: Clique e arraste para navegar pela grid
 - **Imagem de Fundo**: Carregue mapas de RPG ou qualquer imagem como fundo
+- **Sistema de Cenas**: 
+  - Crie múltiplas cenas/encontros
+  - Auto-save automático a cada alteração
+  - Troque entre cenas instantaneamente
+  - Cada cena salva: tokens, mapa, posições, zoom, configurações
+  - Persistência em LocalStorage (tudo salvo no navegador)
+  - Imagens salvas em base64 (sem necessidade de servidor)
 - **Sistema de Tokens**: 
   - Crie tokens circulares com imagem e nome
   - Arraste e solte tokens pelo mapa
@@ -53,6 +60,20 @@ http://localhost:8000
 
 ## 🎮 Controles
 
+### Cenas
+- **🎬 Painel de Cenas** (canto inferior esquerdo):
+  - ➕ Criar nova cena/encontro
+  - 📋 Lista de todas as cenas
+  - ✅ Cena ativa destacada com borda verde
+  - 🔄 Clique em uma cena para trocar instantaneamente
+  - 🗑️ Deletar cenas não utilizadas
+  - 💾 Auto-save automático (aparece indicador "Cena salva!")
+- **O que é salvo em cada cena:**
+  - Todos os tokens (posições, visibilidade, imagens)
+  - Mapa de fundo (imagem completa)
+  - Posição e zoom do canvas
+  - Todas as configurações (cores, tamanhos, opacidades)
+
 ### Grid e Visualização
 - **🖱️ Arrastar Canvas**: Clique e arraste em área vazia para mover a visualização
 - **🔍 Scroll**: Use a roda do mouse para zoom
@@ -94,26 +115,35 @@ O projeto também suporta gestos touch:
 ## 🎲 Casos de Uso
 
 **Perfeito para RPG de Mesa:**
-1. Carregue um mapa de RPG como imagem de fundo
-2. Ajuste a grid para cobrir o mapa perfeitamente
-3. Crie tokens para personagens, monstros e NPCs
-4. Prepare encontros ocultando tokens de inimigos
-5. Revele inimigos gradualmente durante o jogo
-6. Arraste tokens pelo mapa durante o combate
-7. Use zoom para focar em áreas específicas
-8. Ajuste a opacidade da grid conforme necessário
-9. Ideal para sessões online de D&D, Pathfinder, Call of Cthulhu, etc.
+1. Crie cenas separadas para cada encontro/local
+2. Carregue mapas específicos em cada cena
+3. Ajuste a grid para cobrir os mapas perfeitamente
+4. Adicione tokens de personagens e inimigos
+5. Prepare encontros ocultando inimigos
+6. Troque entre cenas durante o jogo
+7. Tudo é salvo automaticamente!
+8. Ideal para D&D, Pathfinder, Call of Cthulhu, etc.
 
 **Fluxo de Trabalho Recomendado:**
-- **Preparação**: Carregue e ajuste escala/posição da imagem
-- **Configure a grid**: Ajuste tamanho para alinhar com o mapa
-- **Crie tokens**: Adicione personagens e inimigos antes da sessão
-- **Prepare encontros**: Oculte tokens de inimigos usando o botão 👁️
-- **Durante o jogo**: 
-  - Revele inimigos aos poucos
-  - Mova tokens conforme os personagens se movem
-  - Ajuste zoom para focar em combates
-  - Acompanhe posições em tempo real
+
+**Preparação (antes da sessão):**
+1. Crie uma cena para cada encontro:
+   - "Taverna" - mapa da taverna + NPCs
+   - "Floresta - Emboscada" - mapa + goblins ocultos
+   - "Caverna do Dragão" - mapa + dragão + tesouro
+2. Configure cada cena:
+   - Carregue o mapa apropriado
+   - Ajuste grid e zoom
+   - Adicione todos os tokens
+   - Oculte inimigos que devem ser surpresa
+3. Tudo salvo automaticamente!
+
+**Durante o Jogo:**
+- Troque de cena com um clique
+- Revele inimigos gradualmente (botão 👁️)
+- Mova tokens durante combate
+- Use zoom para focar
+- Cada cena mantém seu estado independente
 
 **Outros Usos:**
 - Planejamento arquitetônico
@@ -141,11 +171,19 @@ O sistema é altamente otimizado para garantir performance fluida mesmo com muit
 - Renderização com clipping para imagens circulares
 - Sombras e bordas renderizadas com hardware acceleration
 
+**Sistema de Persistência:**
+- LocalStorage do navegador para armazenamento
+- Auto-save com debounce (500ms) para evitar saves excessivos
+- Imagens convertidas para base64 (sem servidor necessário)
+- Serialização/deserialização eficiente de estado
+- Cada cena é completamente independente
+
 **Performance Geral:**
 - Canvas HTML5 com aceleração por hardware
 - Event handling otimizado para pan e zoom
 - Redraw apenas quando necessário
 - Suporte a centenas de tokens sem lag
+- Troca instantânea entre cenas
 
-Isso garante performance constante independente do nível de zoom, posição ou quantidade de tokens.
+Isso garante performance constante independente do nível de zoom, posição, quantidade de tokens ou número de cenas.
 
