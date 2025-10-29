@@ -548,11 +548,13 @@
     <canvas id="canvas"></canvas>
     
     <div class="player-indicator">
-        🎮 <strong>{{ player_name }}</strong> | Sala: {{ room.name }}
+        <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
+            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+          </svg></span> <strong>{{ player_name }}</strong> | Sala: {{ room.name }}
     </div>
     
     <div class="viewer-mode-banner">
-        👁️ Modo Visualização - Acompanhe o mestre em tempo real
+        Modo Visualização
     </div>
     
     <div class="controls">
@@ -654,7 +656,6 @@
     </div>
     
     <div class="info">
-        <div>🖱️ <span>Arraste</span> para mover | 🔍 <span>Scroll</span> para zoom</div>
         <div style="margin-top: 5px;">Zoom: <span id="zoomLevel">100%</span></div>
     </div>
 
@@ -1637,7 +1638,7 @@
                     gridX: gridX,
                     gridY: gridY
                 }));
-                console.log('📤 Movimentação enviada:', {tokenId, gridX, gridY});
+                console.log('Movimentação enviada:', {tokenId, gridX, gridY});
             }
         }
 
@@ -1646,26 +1647,26 @@
             ws = new WebSocket(`${protocol}//${window.location.host}/ws/room/${roomCode}/`);
 
             ws.onopen = () => {
-                console.log('✅ Conectado à sala como jogador');
+                console.log('Conectado à sala como jogador');
                 // Pedir estado inicial
                 ws.send(JSON.stringify({action: 'get_state'}));
             };
 
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-                console.log('📨 Mensagem WebSocket recebida:', data);
+                console.log('Mensagem WebSocket recebida:', data);
                 
                 if (data.type === 'room_state' && data.data && data.data.scene_data) {
                     // Carregar estado inicial
-                    console.log('📥 Estado inicial recebido:', data.data.scene_data);
+                    console.log('Estado inicial recebido:', data.data.scene_data);
                     loadState(data.data.scene_data);
                 } else if (data.type === 'scene_update' && data.scene_data) {
                     // Atualizar cena em tempo real
-                    console.log('🔄 Atualização recebida do mestre:', data.scene_data);
+                    console.log('Atualização recebida do mestre:', data.scene_data);
                     loadState(data.scene_data);
                 } else if (data.type === 'token_moved') {
                     // Token foi movido (por outro jogador ou mestre)
-                    console.log('🎭 Token movido:', data);
+                    console.log('Token movido:', data);
                     const token = tokens.find(t => t.id === data.token_id);
                     if (token) {
                         token.gridX = data.gridX;
@@ -1676,11 +1677,11 @@
             };
 
             ws.onerror = (error) => {
-                console.error('❌ Erro WebSocket:', error);
+                console.error('Erro WebSocket:', error);
             };
 
             ws.onclose = () => {
-                console.log('🔌 Desconectado. Reconectando em 3s...');
+                console.log('Desconectado. Reconectando em 3s...');
                 setTimeout(connectWebSocket, 3000);
             };
         }
@@ -1695,14 +1696,14 @@
             const token = getTokenAtPosition(e.clientX, e.clientY);
             if (token && !canPlayerMoveToken(token)) {
                 // Se clicou em token que NÃO é seu, bloqueia
-                console.log('⛔ Este token não é seu');
+                console.log('Este token não é seu');
                 e.stopPropagation();
                 e.preventDefault();
                 return false;
             }
             // Se é seu token ou não clicou em token, permite continuar
             if (token && canPlayerMoveToken(token)) {
-                console.log('✅ Você pode mover este token');
+                console.log('Você pode mover este token');
             }
         }, true); // Capture phase = executa ANTES
         
@@ -1717,7 +1718,7 @@
                     console.log('📤 Token movido:', draggingToken.name);
                 } else {
                     // Se não pode mover, não faz nada (já foi bloqueado no mousedown)
-                    console.log('⛔ Movimentação não permitida');
+                    console.log('Movimentação não permitida');
                 }
                 canvas.style.cursor = 'grab';
                 draggingToken = null;
@@ -1726,7 +1727,7 @@
             }
         };
 
-        console.log('🎮 Modo Jogador Ativo - Mova seus tokens atribuídos!');
+        console.log('Modo Jogador Ativo - Mova seus tokens atribuídos!');
     </script>
 </body>
 </html>
